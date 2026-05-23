@@ -4,14 +4,6 @@ from pypdf import PdfReader
 from pypdf.errors import PdfReadError
 
 
-def ensure_folder(folder: Path) -> None:
-    try:
-        folder.mkdir(parents=True, exist_ok=True)
-    except (PermissionError, OSError) as e:
-        print(f"Error creating folder '{folder}': {e}")
-        sys.exit(1)
-
-
 def load_pdf(pdf_path: Path) -> PdfReader:
     try:
         return PdfReader(pdf_path)
@@ -47,24 +39,33 @@ def write_output(extracted_text: str, output_path: Path) -> None:
         print(f"Error writing to file '{output_path}': {e}")
         sys.exit(1)
 
+def traversal(folder: Path) -> None:
+    extracted_text = ""
+    for item in folder.iterdir():
+        if item.is_file() and item.suffix.lower() == ".pdf":
+            print(f"File: {item.name}")
+            extracted_text +=process_pdf_file(item)
+        elif item.is_dir():
+            print(f"Directory: {item.name}")
+            traversal(item)
+    if not extracted_text:
+        return
+    output_path = folder / "output.txt"
+    write_output(extracted_text, output_path)
+    print("Text extracted successfully.")
 
 def main() -> None:
     script_dir = Path(__file__).parent
     folder = script_dir / "content"
-    ensure_folder(folder)
+    traversal(folder)
 
-    pdf_path = folder / "Chemistry Questions.pdf"
+def process_pdf_file(pdf_path: Path) -> str:
     if not pdf_path.is_file():
         print(f"PDF file '{pdf_path}' does not exist.")
         sys.exit(1)
 
     reader = load_pdf(pdf_path)
-    extracted_text = extract_text_from_reader(reader)
-
-    output_path = folder / "output.txt"
-    write_output(extracted_text, output_path)
-    print("Text extracted successfully.")
-
+    return extract_text_from_reader(reader)
 
 if __name__ == "__main__":
     main()
