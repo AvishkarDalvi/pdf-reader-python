@@ -1,6 +1,10 @@
 # PDF Reader
 
-Small script to extract text from a PDF placed in the `content/` folder and write it to `output.txt` in the same folder.
+Small script to extract text from PDFs placed in the `content/` folder (including subfolders).
+
+## What it does
+- Recursively traverses the `content/` directory and processes any `.pdf` files it finds.
+- For each folder that contains one or more PDFs, the script creates `output.txt` in that folder containing the concatenated extracted text from the PDFs in that folder.
 
 ## Requirements
 - Python 3.7+
@@ -13,20 +17,35 @@ python3 -m pip install --user pypdf
 ```
 
 ## Usage
-1. Put `Chemistry Questions.pdf` inside the `content/` folder next to this script. The script will create the `content/` folder if it does not exist.
-2. Run the script:
+1. Place one or more PDF files inside the `content/` folder (you may also organize PDFs in subfolders).
+2. Run the script from the project root:
 
 ```bash
-python3 python-projects/pdf-reader/main.py
+python3 main.py
 ```
 
-Output: `content/output.txt` will be created (or overwritten) with the extracted text.
+Behavior notes:
+- The script does not currently create the `content/` folder automatically — the folder must exist before running.
+- Each folder that directly contains PDF files will get an `output.txt` file with the extracted text for PDFs in that folder. Subfolders that contain PDFs will receive their own `output.txt` files.
 
 ## Error handling
-- If the `content/` folder cannot be created the script exits with an error message.
-- If `Chemistry Questions.pdf` is not found in `content/` the script prints an error and exits.
-- If `output.txt` cannot be written (permissions, disk errors) the script prints an error and exits.
+- If a PDF file cannot be read the script prints a warning for that page or file and continues where possible.
+- If a required PDF path is missing or a critical I/O error occurs (e.g., writing `output.txt` fails), the script prints an error and exits with a non-zero status.
 
-## Notes / Improvements
-- To process a different PDF or output path, modify `main.py` or add CLI argument parsing.
-- Consider adding a `requirements.txt` if you want to pin dependencies.
+## Implementation details
+- Entry point: `main.py` — it calls `traversal()` on the `content` directory and uses `pypdf.PdfReader` to extract text.
+- The code writes UTF-8 `output.txt` files and prints progress messages to stdout.
+
+## Possible improvements
+- Create the `content/` folder automatically if it does not exist.
+- Add CLI arguments to specify input directory, output file naming, or a single combined output.
+- Add logging instead of printing, and add verbosity levels.
+- Add OCR fallback (e.g., Tesseract) for scanned PDFs with no extractable text.
+- Add a `requirements.txt` or `pyproject.toml` to pin dependencies.
+
+## Quick checklist
+- Place PDFs in `content/` (or subfolders).
+- Run `python3 main.py` from the project root.
+- Look for `output.txt` in any folder that contained PDFs.
+
+If you'd like, I can update the script to create the `content/` folder automatically or add CLI options next.
