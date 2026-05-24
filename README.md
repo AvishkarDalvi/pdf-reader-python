@@ -17,16 +17,32 @@ python3 -m pip install --user pypdf
 ```
 
 ## Usage
-1. Place one or more PDF files inside the `content/` folder (you may also organize PDFs in subfolders).
-2. Run the script from the project root:
+Place PDFs under the project (or use an explicit path for the `page` mode). Two CLI modes are available:
+
+- Traversal mode (process a content tree):
 
 ```bash
-python3 main.py
+python3 main.py traversal
 ```
 
-Behavior notes:
-- The script does not currently create the `content/` folder automatically — the folder must exist before running.
-- Each folder that directly contains PDF files will get an `output.txt` file with the extracted text for PDFs in that folder. Subfolders that contain PDFs will receive their own `output.txt` files.
+This looks for a `content/` folder next to `main.py`, recursively extracts text from all `.pdf` files, and writes an `output.txt` into each folder that contains PDFs.
+
+- Page mode (extract a single page from a PDF):
+
+```bash
+python3 main.py page <relative-or-absolute-pdf-path> <page_number>
+```
+
+Example:
+
+```bash
+python3 main.py page content/Chemistry\ Questions.pdf 2
+```
+
+Notes:
+- The `traversal` command expects a `content/` directory next to `main.py` (the script does not auto-create it yet).
+- The `page` command accepts a path to any PDF file; `page_number` is 1-based and must be a positive integer.
+- Each folder that directly contains PDFs will get its own `output.txt` file with the concatenated extracted text for PDFs in that folder. Subfolders that contain PDFs will receive their own `output.txt` files.
 
 ## Error handling
 - If a PDF file cannot be read the script prints a warning for that page or file and continues where possible.
