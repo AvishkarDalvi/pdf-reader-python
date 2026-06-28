@@ -40,5 +40,5 @@ def apply_regex(text: str, regex_config: dict) -> list:
         return []
     matches = []
     pattern = regex_config["regex"]
-    matches = re.findall(pattern, text)
+    matches = re.findall(pattern, text, re.DOTALL)
     return matches

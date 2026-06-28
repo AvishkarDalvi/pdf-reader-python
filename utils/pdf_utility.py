@@ -15,6 +15,7 @@ from pypdf import PdfReader
 from pypdf.errors import PdfReadError
 
 from utils.config_utility import apply_regex, load_config
+from utils.db_utility import connect_database, create_questions_table, insert_question, close_database
 
 def load_pdf(pdf_path: Path) -> PdfReader:
     """Open a PDF file and return a PdfReader instance.
@@ -110,9 +111,51 @@ def process_pdf_file(pdf_path: Path, page_number: Optional[int] = None) -> str:
 
     reader = load_pdf(pdf_path)
     extracted_text = extract_text_from_reader(reader, page_number)
+    lines = extracted_text.splitlines()
+    subject = extract_subject(lines)
+    current_chapter = extract_current_chapter(lines)
+    regex_matches = []
     regex_config = load_config()
     regex_matches = apply_regex(extracted_text, regex_config)
+    connection = connect_database()
+    create_questions_table(connection)
+    for question_block in regex_matches:
+        question = parse_question(subject, current_chapter, question_block)
+        insert_question(connection, question)
+    close_database(connection)
     return "\n".join(regex_matches)
+
+def parse_question(subject, current_chapter, question_block) -> dict:
+    lines = question_block.splitlines()
+    parts = lines[0].split(" ", 1)
+    question_text = parts[1]
+    options = [option.strip() for option in lines[1:5]]
+    answer = lines[5].replace("Answer:", "").strip()
+    question = {
+            "subject": subject,
+            "chapter": current_chapter,
+            "question": question_text,
+            "options": options,
+            "answer": answer
+        }
+    
+    return question
+
+def extract_current_chapter(lines):
+    current_chapter = None
+    for line in lines:
+        if line.startswith("Chapter"):
+            current_chapter = line.strip()
+            break
+    return current_chapter
+
+def extract_subject(lines):
+    subject = None
+    for line in lines:
+        if line.strip():
+            subject = line.strip()
+            break
+    return subject
 
 
 def write_output(extracted_text: str, output_path: Path) -> None:
