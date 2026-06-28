@@ -14,6 +14,8 @@ from typing import Optional
 from pypdf import PdfReader
 from pypdf.errors import PdfReadError
 
+from utils.config_utility import apply_regex, load_config
+
 def load_pdf(pdf_path: Path) -> PdfReader:
     """Open a PDF file and return a PdfReader instance.
 
@@ -107,7 +109,10 @@ def process_pdf_file(pdf_path: Path, page_number: Optional[int] = None) -> str:
         sys.exit(1)
 
     reader = load_pdf(pdf_path)
-    return extract_text_from_reader(reader, page_number)
+    extracted_text = extract_text_from_reader(reader, page_number)
+    regex_config = load_config()
+    regex_matches = apply_regex(extracted_text, regex_config)
+    return "\n".join(regex_matches)
 
 
 def write_output(extracted_text: str, output_path: Path) -> None:
