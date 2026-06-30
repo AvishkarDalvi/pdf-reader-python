@@ -1,6 +1,13 @@
 from pathlib import Path
 
 def load_config():
+    """Load regex configuration values from the project config file.
+
+    Returns:
+        A dictionary of parsed configuration entries when the file exists,
+        contains key-value pairs, and includes a ``regex`` entry. Otherwise,
+        an empty dictionary.
+    """
     config_path = Path(__file__).resolve().parent.parent / "config" / "config.txt"
     if config_path.is_file():
         print(f"Loading configuration from {config_path}")

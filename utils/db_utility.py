@@ -97,6 +97,21 @@ def insert_question(connection, question_data):
         cursor.close()
         
 def fetch_questions_by_chapter(chapter_name, connection):
+    """Fetch all questions for a given chapter from the database.
+
+    Args:
+        chapter_name (str): The name of the chapter to fetch questions for.
+        connection: The MySQL connection object.
+
+    Returns:
+        A list of dictionaries, each representing a question row with keys:
+        'id', 'subject', 'chapter', 'question', 'option_a', 'option_b',
+        'option_c', 'option_d', and 'answer'. Returns an empty list if no
+        questions match the chapter name.
+
+    Exits:
+        The program exits if the query fails due to a database error.
+    """
     cursor = connection.cursor(dictionary=True)
     try:
         cursor.execute("SELECT * FROM questions WHERE chapter = %s", (chapter_name,))
