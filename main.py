@@ -11,6 +11,7 @@ from pathlib import Path
 import sys
 from features.traversal import traversal
 from features.page import page
+from features.chapter import chapter
 
 
 def main() -> None:
@@ -50,6 +51,15 @@ def main() -> None:
                 sys.exit(1)
             path = script_dir / Path(sys.argv[2])
             page(path, page_number)
+        elif feature == "chapter":
+            if len(sys.argv) < 3:
+                print("Usage: python3 main.py chapter <name>")
+                sys.exit(1)
+            chapter_name = sys.argv[2]
+            if not chapter_name.strip():
+                print("Error: Chapter name cannot be empty.")
+                sys.exit(1)
+            chapter(chapter_name)
 
 
 if __name__ == "__main__":

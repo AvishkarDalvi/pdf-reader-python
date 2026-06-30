@@ -96,6 +96,18 @@ def insert_question(connection, question_data):
     finally:
         cursor.close()
         
+def fetch_questions_by_chapter(chapter_name, connection):
+    cursor = connection.cursor(dictionary=True)
+    try:
+        cursor.execute("SELECT * FROM questions WHERE chapter = %s", (chapter_name,))
+        questions = cursor.fetchall()
+        return questions
+    except mysql.connector.Error as err:
+        print(f"Error fetching questions: {err}")
+        sys.exit(1)
+    finally:
+        cursor.close()
+        
 def close_database(connection):
     """
     Close the database connection.
